@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
+import sys
 
 ## FUNÇÕES DO GAUSS JORDAN ##
 
@@ -18,7 +19,7 @@ def Escalona(x,resp):
    # y=np.copy(x[tt])
    # x[tt]=np.copy(x[t])
    # x[t]=np.copy(y)
-   op=op+2+n
+   #op=op+2+n
    lamda.append(x.item(t,tt)/x.item(tt,tt))
    resp2[t]=resp2[t]-lamda[-1]*resp2[tt]
    x[t]=np.copy(x[t]-lamda[-1]*x[tt])
@@ -68,6 +69,7 @@ def FazTudo(x,resp):
 
 
 ## FUNÇÕES PARA GERAR O SISTEMA E O JACOBIANO ##
+filewrite=open(sys.argv[4], 'w')
 
 def func1(a):
  return a[0]**2-81*(a[1]+0.1)**2+np.sin(a[2])+1.06
@@ -86,14 +88,16 @@ def dfunc(func,x,i):
 
 funcs=[func1, func2, func3]
 h=1e-3
-x=[0.1,0.1,-0.1]
+x=[float(sys.argv[1]),float(sys.argv[2]),float(sys.argv[3])]
 ox=[0,0,0]
 F=[0.,0.,0.]
 y=[0.,0.,0.]
 n=len(x)
 jacob=np.zeros((n,n+1),float)
-
-while((ox[0]-x[0])**2+(ox[1]-x[1])**2+(ox[2]-x[2])**2>1e-10):
+ii=0
+print "Valores tentativos:"
+while((ox[0]-x[0])**2+(ox[1]-x[1])**2+(ox[2]-x[2])**2>1e-10 and ii<15):
+ ii=ii+1
  ox=np.copy(x)
  for i in xrange(0,3):
   F[i]=-funcs[i](x)
@@ -103,8 +107,20 @@ while((ox[0]-x[0])**2+(ox[1]-x[1])**2+(ox[2]-x[2])**2>1e-10):
   jacob.itemset((i,3), F[i])
  
  y=FazTudo(jacob,F)
+ print "Mudanças dos valores em x"
+ print y
+ filewrite.write(str(y[0]**2+y[1]**2+y[2]**2) + '    ' + str(ii) + '\n')
  
  for i in xrange(0,len(y)):
   x[i]=x[i]+y[i]
+ print "Raízes atualizadas"
+ print x
 
+print "Norma do vetor"
+print x[0]**2+x[1]**2+x[2]**2
+
+print "Quantidade de passos"
+print ii
+
+print "Resultado final"
 print x
